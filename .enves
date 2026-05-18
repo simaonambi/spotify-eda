@@ -1,0 +1,17 @@
+# Spotify API Credentials (não utilizados com crawler, mas manter para referência)
+SPOTIFY_CLIENT_ID=xxx
+SPOTIFY_CLIENT_SECRET=xxx
+SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
+
+# Last.fm API Credentials
+LASTFM_API_KEY=5b2cb3035ed3f053dc7f25f26d4c1630
+LASTFM_API_SECRET=9b9bc8247111f9d62e5d557c396e1576
+
+# Database Configuration
+DB_PATH=./spotify.db
+
+# Logging
+LOG_LEVEL=INFO
+
+# Environment
+ENVIRONMENT=development

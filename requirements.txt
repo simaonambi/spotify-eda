@@ -1,0 +1,18 @@
+# Data Processing
+pandas==2.0.3
+numpy==1.24.3
+pyarrow==12.0.1
+
+# Web Scraping (para Crawler)
+requests==2.31.0
+beautifulsoup4==4.12.2
+urllib3==2.0.4
+
+# Configuration
+python-dotenv==1.0.0
+
+# Spotify API (opcional, para depois)
+spotipy==2.23.0
+
+# Logging
+python-json-logger==2.0.7

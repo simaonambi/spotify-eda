@@ -1,0 +1,93 @@
+# .gitignore
+# Spotify EDA Project
+
+# Environment & Credentials
+.env
+.env.local
+*.env
+secrets.json
+credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+venv.bak/
+env.bak/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Data Files (large)
+data/raw/*.zip
+data/raw/*.tar.gz
+data/raw/*.tar
+data/raw/*.sqlite
+data/raw/*.db
+data/downloads/*.zip
+data/downloads/*.tar.gz
+*.parquet
+*.csv
+!.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary Files
+temp/
+tmp/
+.cache/
+*.tmp
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# StreamLit Cache
+.streamlit/
+
+# VS Code
+.vscode/settings.json
