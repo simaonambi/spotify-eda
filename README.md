@@ -1,15 +1,15 @@
-# 🎵 Spotify EDA - Exploratory Data Analysis Pipeline
+#  Spotify EDA - Exploratory Data Analysis Pipeline
 
 **Exploratory Data Analysis** de dados musicais do Spotify, integrando múltiplas fontes de dados públicas.
 
-## 📋 Visão Geral
+##  Visão Geral
 
 Este projeto implementa um **pipeline ETL completo** (Extract, Transform, Load, Visualize) para análise de dados musicais:
 
-- **Semana 1 (EXTRACTION)** ✅ COMPLETA
-- **Semana 2 (TRANSFORMATION)** 🔄 EM PROGRESSO
-- **Semana 3 (LOAD)** 📝 PLANEJADA
-- **Semana 4 (VISUALIZATION)** 📝 PLANEJADA
+- **Semana 1 (EXTRACTION)**  COMPLETA
+- **Semana 2 (TRANSFORMATION)**  EM PROGRESSO
+- **Semana 3 (LOAD)**  PLANEJADA
+- **Semana 4 (VISUALIZATION)**  PLANEJADA
 
 ---
 
@@ -51,7 +51,7 @@ Este projeto implementa um **pipeline ETL completo** (Extract, Transform, Load, 
 
 ---
 
-## 🏗️ Arquitetura
+##  Arquitetura
 
 ### Estrutura de Pastas
 
@@ -94,7 +94,7 @@ spotify-eda/
 
 ### Módulos Implementados (Week 1)
 
-#### 1️⃣ **main_extract.py** (Orquestrador Principal)
+#### 1 **main_extract.py** (Orquestrador Principal)
 
 ```python
 ExtractionOrchestrator
