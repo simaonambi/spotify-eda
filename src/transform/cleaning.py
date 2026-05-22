@@ -41,7 +41,7 @@ class DataCleaner:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
         
-        print(f"     ✅ Final: {len(df)} records (removed {initial - len(df)})")
+        print(f"      Final: {len(df)} records (removed {initial - len(df)})")
         return df
     
     def clean_artists(self, df):
@@ -67,7 +67,7 @@ class DataCleaner:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
         
-        print(f"     ✅ Final: {len(df)} records (removed {initial - len(df)})")
+        print(f"      Final: {len(df)} records (removed {initial - len(df)})")
         return df
     
     def clean_playlists(self, df):
@@ -93,7 +93,7 @@ class DataCleaner:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
         
-        print(f"     ✅ Final: {len(df)} records (removed {initial - len(df)})")
+        print(f"     Final: {len(df)} records (removed {initial - len(df)})")
         return df
 
 
@@ -114,7 +114,7 @@ def clean_all_data(raw_path='data/raw', output_path='data/staging'):
     raw_p = Path(raw_path)
     
     if not raw_p.exists():
-        print(f"❌ Error: {raw_path} not found")
+        print(f"Error: {raw_path} not found")
         return cleaned_data
     
     print(f"\n[LOADING] Files from {raw_path}...")
@@ -162,7 +162,7 @@ def clean_all_data(raw_path='data/raw', output_path='data/staging'):
             print(f"  ✓ {out_file.name} ({len(df)} records)")
     
     print("\n" + "="*70)
-    print(f"✅ CLEANING DONE: {len(cleaned_data)} datasets cleaned")
+    print(f" CLEANING DONE: {len(cleaned_data)} datasets cleaned")
     print("="*70)
     
     return cleaned_data

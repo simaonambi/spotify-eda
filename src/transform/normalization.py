@@ -116,12 +116,12 @@ def normalize_all_data(input_path='data/staging', output_path='data/staging'):
             df = normalizer.clamp_values(df)
             print(f"     ✓ Clamped values to valid ranges")
             
-            print(f"     ✅ Final: {len(df)} records")
+            print(f"      Final: {len(df)} records")
             
             normalized_data[name] = df
         
         except Exception as e:
-            print(f"  ❌ Error: {e}")
+            print(f"   Error: {e}")
     
     # Save
     if normalized_data:
@@ -133,7 +133,7 @@ def normalize_all_data(input_path='data/staging', output_path='data/staging'):
             print(f"  ✓ {out_file.name} ({len(df)} records)")
     
     print("\n" + "="*70)
-    print(f"✅ NORMALIZATION DONE: {len(normalized_data)} datasets normalized")
+    print(f" NORMALIZATION DONE: {len(normalized_data)} datasets normalized")
     print("="*70)
     
     return normalized_data
