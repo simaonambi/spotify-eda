@@ -1,0 +1,17 @@
+{
+  "week": 2,
+  "phase": "transformation",
+  "datasets": {
+    "cleaned": 8,
+    "normalized": 8,
+    "integrated": 2
+  },
+  "records": {
+    "integrated_tracks": 521,
+    "integrated_artists": 90
+  },
+  "validation": {
+    "tracks_issues": 0,
+    "artists_issues": 0
+  }
+}

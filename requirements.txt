@@ -1,18 +1,28 @@
+# requirements.txt
+# Spotify EDA - Exploratory Data Analysis Pipeline
+# Week 1 (Extraction) + Week 2 (Transformation)
+
 # Data Processing
 pandas==2.0.3
 numpy==1.24.3
 pyarrow==12.0.1
 
-# Web Scraping (para Crawler)
+# Web Scraping (Week 1)
 requests==2.31.0
 beautifulsoup4==4.12.2
 urllib3==2.0.4
 
-# Configuration
+# Configuration & Environment
 python-dotenv==1.0.0
-
-# Spotify API (opcional, para depois)
-spotipy==2.23.0
 
 # Logging
 python-json-logger==2.0.7
+
+# Optional: Spotify API (for future use)
+spotipy==2.23.0
+
+# Development
+pytest==7.3.1
+pytest-cov==4.1.0
+black==23.3.0
+flake8==6.0.0
