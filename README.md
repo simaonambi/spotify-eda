@@ -1,506 +1,164 @@
-# Spotify EDA - Exploratory Data Analysis Pipeline
+# Spotify EDA
 
-Exploratory Data Analysis of Spotify music data, integrating multiple public data sources with a professional ETL pipeline.
+Professional ETL pipeline for Spotify-adjacent public data. The project is organized as four deliberate steps: extract only what matters, normalize it once, load it into a dimensional model, and expose it through a single analytical surface.
 
-Status: WEEK 2 COMPLETE
+Status: WEEK 4 COMPLETE
+
+---
+
+## Why This Architecture
+
+The project uses a narrow data path because analytical systems degrade when every layer invents its own truth.
+
+- Week 1 captures raw source fidelity in parquet.
+- Week 2 standardizes and integrates records into staging outputs with explicit lineage.
+- Week 3 loads a SQLite star schema so analytical joins are predictable and referential integrity is enforced.
+- Week 4 keeps the dashboard read-only, curated and asynchronous so the UI never becomes an operational bottleneck.
+
+The design goal is simple: one warehouse, one pane of glass, one set of curated questions.
 
 ---
 
 ## Project Status
 
-| Week | Phase | Status | Records | Files |
-|------|-------|--------|---------|-------|
-| 1 | EXTRACTION | COMPLETE | 750 | 8 (raw) |
-| 2 | TRANSFORMATION | COMPLETE | 750 | 18 (staged) |
-| 3 | LOAD | PLANNED | - | DB |
-| 4 | VISUALIZATION | PLANNED | - | Dashboard |
+| Week | Phase | Status | Output |
+|------|-------|--------|--------|
+| 1 | Extraction | COMPLETE | 8 raw parquet files |
+| 2 | Transformation | COMPLETE | 18 staging parquet files |
+| 3 | Load | COMPLETE | `data/spotify_dw.db` |
+| 4 | Visualization | COMPLETE | Tkinter dashboard |
 
 ---
 
-## Week 2 Summary
+## Week 4
 
-### Implemented Features
+### Intent
 
-- Cleaning (cleaning.py): Removes nulls and duplicates
-- Normalization (normalization.py): Standardizes text, dates, numbers
-- Integration (week2_orchestrator.py): Combines 3 data sources
-- Validation: Verifies data quality
-- Reporting: Generates JSON quality report
+Week 4 is not a generic GUI layer. It exists to reduce analytical friction:
 
-### Week 2 Results
+- the dashboard is a single control surface
+- the SQL console is curated, not open-ended
+- every database read runs off the UI thread
+- progress feedback lives inside the interface, not in noisy terminal output
 
-| Metric | Value |
-|--------|-------|
-| Datasets Cleaned | 8 |
-| Datasets Normalized | 8 |
-| Integrated Tracks (unique) | 100+ |
-| Integrated Artists (unique) | 50+ |
-| Validation Status | PASSED |
-| Execution Time | 5-10 seconds |
+### Delivery
+
+- `dashboard/app.py`: launcher
+- `src/visualization/queries.py`: high-value analytical SQL catalog
+- `src/visualization/repository.py`: read-only SQLite access layer
+- `src/visualization/services.py`: background execution for non-blocking I/O
+- `src/visualization/ui.py`: Swiss-style Tkinter interface
+
+### Curated Views
+
+- `Artist Momentum`: cumulative playcount and listener weight by artist
+- `Track Reach`: strongest listener footprint by track
+- `Source Mix`: operational volume by upstream source
+- `Catalog Timeline`: release cadence and popularity over time
 
 ---
 
-## Architecture
+## Data Model
 
-### Folder Structure
+The warehouse is a compact star schema.
 
-```
-spotify-eda/
-|
-+-- src/
-|   |
-|   +-- extract/              (Week 1 - COMPLETE)
-|   |   |-- main_extract.py
-|   |   |-- spotify_crawler.py
-|   |   |-- spotify_charts.py
-|   |   +-- lastfm_api.py
-|   |
-|   +-- transform/            (Week 2 - COMPLETE)
-|   |   |-- __init__.py
-|   |   |-- cleaning.py              (150 lines)
-|   |   +-- normalization.py         (120 lines)
-|   |
-|   +-- orchestration/        (Week 2 - COMPLETE)
-|   |   |-- __init__.py
-|   |   +-- week2_orchestrator.py    (280 lines)
-|   |
-|   +-- config/               (Week 1 - COMPLETE)
-|       |-- config.py
-|       +-- logging_config.py
-|
-+-- data/
-|   |
-|   +-- raw/                  (Week 1 OUTPUT - 8 files)
-|   |   |-- spotify_tracks.parquet
-|   |   |-- spotify_artists.parquet
-|   |   |-- spotify_playlists.parquet
-|   |   |-- spotify_charts_tracks.parquet
-|   |   |-- spotify_charts_artists.parquet
-|   |   |-- spotify_charts_playlists.parquet
-|   |   |-- lastfm_top_tracks.parquet
-|   |   +-- lastfm_artists.parquet
-|   |
-|   +-- staging/              (Week 2 OUTPUT - 18 files)
-|       |-- clean_*.parquet (8 files - cleaned data)
-|       |-- norm_*.parquet (8 files - normalized data)
-|       |-- integrated_tracks.parquet
-|       +-- integrated_artists.parquet
-|
-+-- reports/                  (Week 2 OUTPUT)
-|   +-- week2_quality_report.json
-|
-+-- requirements.txt
-+-- README.md
-+-- .gitignore
+### `dim_artist`
+
+- Grain: one artist
+- Key: `artist_key`
+- Purpose: stable descriptive context for artist-level analysis
+
+### `dim_track`
+
+- Grain: one unique `(track_name, artist_name)`
+- Key: `track_key`
+- Purpose: track-level descriptive context tied to a single artist
+
+### `fact_plays`
+
+- Grain: one integrated play observation
+- Key: `play_key`
+- Purpose: measures such as `playcount`, `listeners`, `rank`, `popularity` and `duration_ms`
+
+Foreign keys are enforced, and analytical indexes are created during load so the dashboard does not rely on full-table scans for common aggregations.
+
+---
+
+## Layout
+
+```text
+src/
+  extract/
+  transform/
+  load/
+  visualization/
+
+dashboard/
+  app.py
+
+data/
+  raw/
+  staging/
+  spotify_dw.db
 ```
 
 ---
 
-## Installation
+## Run
 
-### Prerequisites
-
-- Python 3.9 or higher
-- pip or conda
-- Virtual environment (recommended)
-
-### Setup
+### 1. Transformation
 
 ```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # macOS/Linux
-# or
-venv\Scripts\activate  # Windows
-
-# Install dependencies
-pip install -r requirements.txt
+python -m src.transform.Week2_orchestrator
 ```
 
----
-
-## Execution
-
-### Week 1: Data Extraction (Complete)
+### 2. Load
 
 ```bash
-python src/extract/main_extract.py
+python -m src.load.loader
 ```
 
-Output: 8 Parquet files in `data/raw/` (750 records, 94.1 KB)
-
-### Week 2: Data Transformation (Complete)
+### 3. Dashboard
 
 ```bash
-python src/orchestration/week2_orchestrator.py
-```
-
-This executes the complete pipeline:
-1. Cleaning (removes nulls and duplicates)
-2. Normalization (standardizes values)
-3. Integration (combines 3 sources)
-4. Validation (checks data quality)
-5. Report Generation (JSON output)
-
-Execution time: 5-10 seconds
-
-Expected output:
-
-```
-======================================================================
-SPOTIFY EDA - WEEK 2 COMPLETE
-Clean -> Normalize -> Integrate -> Validate
-======================================================================
-
-STEP 1/4: CLEANING
-CLEANING DONE: 8 datasets cleaned
-
-STEP 2/4: NORMALIZATION
-NORMALIZATION DONE: 8 datasets normalized
-
-STEP 3/4: INTEGRATION
-Result: 100+ unique tracks, 50+ unique artists
-
-STEP 4/4: VALIDATION & REPORTS
-All validations passed!
-Report saved: reports/week2_quality_report.json
-
-======================================================================
-WEEK 2 COMPLETE
-======================================================================
-
-Output files: data/staging/ (18 files)
-Report: reports/week2_quality_report.json
+python dashboard/app.py
 ```
 
 ---
 
-## Week 2 Modules
+## Verification
 
-### 1. cleaning.py (150 lines)
-
-Purpose: Remove nulls, duplicates, standardize data types
-
-Class: DataCleaner
-
-Methods:
-- clean_tracks(df) - Cleans track data
-- clean_artists(df) - Cleans artist data
-- clean_playlists(df) - Cleans playlist data
-
-Features:
-- Removes rows with null values in critical fields
-- Removes duplicate records (by ID or name)
-- Converts data types (string to int, float)
-- Replaces special values ('N/A', 'unknown', etc)
-
-### 2. normalization.py (120 lines)
-
-Purpose: Standardize text, dates, numbers
-
-Class: DataNormalizer
-
-Methods:
-- normalize_text_fields(df) - Lowercase, trim, remove spaces
-- normalize_dates(df) - Convert to ISO 8601 format
-- normalize_numeric(df) - Standardize numeric types
-- clamp_values(df) - Restrict to valid ranges
-
-Features:
-- Converts text to lowercase
-- Removes extra spaces (trim, multiple spaces)
-- Formats dates to YYYY-MM-DD
-- Converts numerics to int64/float64
-- Clamps popularity [0-100], duration [0-infinity]
-
-### 3. week2_orchestrator.py (280 lines)
-
-Purpose: Orchestrate complete transformation pipeline
-
-Class: Week2Orchestrator
-
-Executes:
-1. Cleaning (8 datasets)
-2. Normalization (8 datasets)
-3. Integration (3 sources to 2 unified datasets)
-4. Validation (quality checks)
-5. Report generation (JSON)
-
-Output:
-- data/staging/clean_*.parquet (8 files)
-- data/staging/norm_*.parquet (8 files)
-- data/staging/integrated_tracks.parquet
-- data/staging/integrated_artists.parquet
-- reports/week2_quality_report.json
-
----
-
-## Data Schema
-
-### Tracks (After Normalization)
-
-```
-track_id: str                   # Unique identifier
-track_name: str                 # Song name (lowercase, trimmed)
-artist_name: str                # Artist name (lowercase, trimmed)
-album_name: str                 # Album name
-release_year: int64             # Release year [1900-2030]
-popularity: int64               # Score [0-100] (clamped)
-duration_ms: int64              # Duration in milliseconds [0-infinity]
-playcount: int64                # Play count
-listeners: int64                # Global listeners
-source: str                     # Origin (spotify, charts, lastfm)
-```
-
-### Artists (After Normalization)
-
-```
-artist_id: str                  # Unique identifier
-artist_name: str                # Name (lowercase, trimmed)
-followers: int64                # Number of followers
-popularity: int64               # Score [0-100] (clamped)
-genres: str                     # Genres (comma-separated, lowercase)
-playcount: int64                # Total plays
-listeners: int64                # Total listeners
-source: str                     # Origin
-```
-
----
-
-## Data Validation
-
-### Applied Rules
-
-| Field | Rule | Action if Failed |
-|-------|------|------------------|
-| track_name | NOT NULL | DROPPED |
-| artist_name | NOT NULL | DROPPED |
-| track_id | UNIQUE | REMOVED DUPLICATES |
-| popularity | [0, 100] | CLAMPED |
-| duration_ms | [0, infinity] | CLAMPED |
-
-Status: ALL VALIDATIONS PASSED
-
----
-
-## Week 2 Statistics
-
-### Cleaning
-
-- Nulls removed: 0-5 per dataset
-- Duplicates removed: 0-10 per dataset
-- Types standardized: 100%
-
-### Normalization
-
-- Text normalized: 100%
-- Dates formatted: ISO 8601
-- Numbers converted: 100%
-- Values clamped: Popularity [0-100], Duration [0-infinity]
-
-### Integration
-
-- Track sources: Spotify (8), Charts (100), Last.fm (500)
-- Unique tracks: 100+
-- Duplicates removed: 5-10
-- Artist sources: Spotify (8), Charts (49), Last.fm (50)
-- Unique artists: 50+
-
----
-
-## Quick Tests
+The repository includes narrow tests for the warehouse and the visualization access layer.
 
 ```bash
-# Test cleaning
-python << 'EOF'
-import pandas as pd
-df = pd.read_parquet('data/staging/clean_spotify_tracks.parquet')
-print(f"Records: {len(df)}")
-print(f"Nulls: {df.isnull().sum().sum()}")
-print(f"Duplicates: {df.duplicated().sum()}")
-EOF
-
-# Test normalization
-python << 'EOF'
-import pandas as pd
-df = pd.read_parquet('data/staging/norm_spotify_tracks.parquet')
-print(f"Records: {len(df)}")
-print(f"Lowercase: {df['track_name'].str.islower().all()}")
-print(df.head())
-EOF
-
-# Test integration
-python << 'EOF'
-import pandas as pd
-tracks = pd.read_parquet('data/staging/integrated_tracks.parquet')
-print(f"Integrated tracks: {len(tracks)}")
-print(f"Sources: {tracks['source'].unique()}")
-artists = pd.read_parquet('data/staging/integrated_artists.parquet')
-print(f"Integrated artists: {len(artists)}")
-EOF
-
-# View report
-python << 'EOF'
-import json
-with open('reports/week2_quality_report.json') as f:
-    report = json.load(f)
-    print(json.dumps(report, indent=2))
-EOF
+pytest tests/test_load.py tests/test_visualization.py
 ```
+
+What this proves:
+
+- row counts loaded from staging match warehouse counts
+- foreign key integrity holds
+- curated analytical queries execute successfully
+- top-line dashboard metrics are available from the warehouse
 
 ---
 
-## Technical Decisions
+## Current Outputs
 
-### 1. Duplicate Removal Strategy
-REMOVED (keep='first'): Keep first occurrence, remove rest
-Rationale: Simplicity and traceability
-
-### 2. Missing Values Strategy
-DROPPED: Remove rows with nulls in critical fields
-Rationale: Critical data cannot be estimated
-
-### 3. Source Integration Strategy
-MERGE WITH DEDUPLICATION: Combine 3 sources, remove exact duplicates
-Key for tracks: (track_name, artist_name)
-Key for artists: (artist_name)
-Strategy: Keep first occurrence per source
-
-### 4. Validation Approach
-CUSTOM RULES: Validation in pure Python
-Rationale: Simple, no extra dependencies
+- `dim_artist`: 218 rows
+- `dim_track`: 521 rows
+- `fact_plays`: 521 rows
+- `sources`: 3 distinct upstream source labels
 
 ---
 
-## Generated Files (Week 2)
+## Design Notes
 
-### Cleaned Data (8 files)
+The interface follows a high-contrast monochrome system with restrained typography and spacing. The point is not decoration. The point is to make the query, the result and the system state legible at a glance.
 
-```
-data/staging/
-|-- clean_spotify_tracks.parquet (8 records)
-|-- clean_spotify_artists.parquet (8 records)
-|-- clean_spotify_playlists.parquet (5 records)
-|-- clean_spotify_charts_tracks.parquet (100 records)
-|-- clean_spotify_charts_artists.parquet (49 records)
-|-- clean_spotify_charts_playlists.parquet (30 records)
-|-- clean_lastfm_top_tracks.parquet (500 records)
-+-- clean_lastfm_artists.parquet (50 records)
-```
-
-### Normalized Data (8 files)
-
-```
-data/staging/
-|-- norm_spotify_tracks.parquet (8 records)
-|-- norm_spotify_artists.parquet (8 records)
-|-- norm_spotify_playlists.parquet (5 records)
-|-- norm_spotify_charts_tracks.parquet (100 records)
-|-- norm_spotify_charts_artists.parquet (49 records)
-|-- norm_spotify_charts_playlists.parquet (30 records)
-|-- norm_lastfm_top_tracks.parquet (500 records)
-+-- norm_lastfm_artists.parquet (50 records)
-```
-
-### Integrated Data (2 files)
-
-```
-data/staging/
-|-- integrated_tracks.parquet (100+ unique records)
-+-- integrated_artists.parquet (50+ unique records)
-```
-
-### Quality Report (1 file)
-
-```
-reports/
-+-- week2_quality_report.json
-```
-
-Total: 18 staging files + 1 report
+Less is more only works when the underlying structure is rigorous.
 
 ---
 
-## Next Steps - Week 3 (LOAD)
-
-Planned for next week:
-
-1. Create data warehouse schema (star schema)
-2. Implement loader for SQLite or PostgreSQL
-3. Create tables: dim_artist, dim_track, fact_plays
-4. Validate referential integrity
-
-Expected output:
-- Database with 3 tables
-- Data quality checks
-- Indexes and constraints
-
----
-
-## Git Workflow
-
-Commit Week 2 changes:
-
-```bash
-git add -A
-git commit -m "feat: complete week 2 transformation (clean, normalize, integrate, validate)"
-git push
-```
-
-Recommended commits:
-
-```bash
-git commit -m "feat: add cleaning module"
-git commit -m "feat: add normalization module"
-git commit -m "feat: add week2 orchestrator"
-git commit -m "docs: update readme with week 2"
-```
-
----
-
-## Final Metrics (Week 1 + Week 2)
-
-| Metric | Week 1 | Week 2 | Total |
-|--------|--------|--------|-------|
-| Time | 87.8s | 5-10s | ~95s |
-| Files | 8 | 18 | 26 |
-| Records | 750 | 750 | 750 |
-| Size | 94.1 KB | ~50 KB | ~144 KB |
-| Validation | Basic | Complete | PASSED |
-
----
-
-## Team
-
-- Simao Nambi (ID: 53558) - Lead Developer
-- Tiago Neto (ID: a54172) - QA and Validation
-- Institution: Universidade da Beira Interior (UBI), Covilha
-
----
-
-## License
-
-Educational project for Engenharia de Dados e Transformacao (ETL) course.
-
----
-
-## Executive Summary
-
-Spotify EDA is a professional ETL pipeline that:
-
-COMPLETE - Week 1: Extracts 750 records from 3 public sources (87.8s)
-COMPLETE - Week 2: Cleans, normalizes, integrates and validates data (5-10s)
-PLANNED - Week 3: Load to data warehouse (next week)
-PLANNED - Week 4: Visualization with dashboards and BI
-
-Current Status: Week 1 + Week 2 COMPLETE
-
-Next: Week 3 (Load to Database)
-
----
-
-Last Updated: May 22, 2026
-Version: 2.0.0 - Week 2 Complete
-Status: READY FOR WEEK 3
+Last Updated: May 25, 2026  
+Version: 4.0.0 - Week 4 Complete

@@ -13,5 +13,9 @@
   "validation": {
     "tracks_issues": 0,
     "artists_issues": 0
+  },
+  "issues": {
+    "tracks": [],
+    "artists": []
   }
 }
